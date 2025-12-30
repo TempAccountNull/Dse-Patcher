@@ -17,10 +17,14 @@ NTSTATUS DriverEntry( ) {
 	auto ntoskrnl = get_kernel_module( "ntoskrnl.exe" );
 	if ( !ntoskrnl )
 		return STATUS_FAILED_DRIVER_ENTRY;
+	
+	// \x48\x8B\x05\x00\x00\x00\x00\x48\x89\x4C\x24\x00\x48\x8B\x8C\x24 xxx????xxxx?xxxx
+	// \x48\x39\x35\x00\x00\x00\x00\x48\x8B\xF9 xxx????xxx
 	auto se_validate_image_header = find_pattern( ntoskrnl, "\x48\x39\x35\xCC\xCC\xCC\xCC\x48\x8B\xF9", "xxx????xxx" );
 	if ( !se_validate_image_header )
 		return STATUS_FAILED_DRIVER_ENTRY;
-	
+
+	// \x48\x8B\x05\x00\x00\x00\x00\x4C\x8B\xD1\x48\x85\xC0 xxx????xxxxxx
 	auto se_validate_image_data = find_pattern( ntoskrnl, "\x48\x8B\x05\xCC\xCC\xCC\xCC\x4C\x8B\xD1\x48\x85\xC0", "xxx????xxxxxx" ); 
 	if ( !se_validate_image_data )
 		return STATUS_FAILED_DRIVER_ENTRY;
@@ -48,4 +52,5 @@ NTSTATUS DriverEntry( ) {
 	DbgPrintEx( 0, 0, "Swapped to %llX\n", rop ); 
 
 	return STATUS_SUCCESS;
+
 }
